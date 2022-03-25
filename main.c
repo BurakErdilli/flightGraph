@@ -2,7 +2,11 @@
 #include <stdlib.h>
 #include <string.h>
 #define N 30
-
+//C:\Users\berdi\CLionProjects\flightGraph>git remote add origin https://github.com/BurakErdilli/flightGraph.git
+//
+//C:\Users\berdi\CLionProjects\flightGraph>git branch -M main
+//
+//C:\Users\berdi\CLionProjects\flightGraph>git push -u origin main
 typedef struct Graph{
     struct Node* head[N];
 }GRAPH;
@@ -28,25 +32,25 @@ typedef struct City {
     char name[15];
 }CITY;
 
-int dosyadanOku(EDGE*);
-int sehirID(EDGE*, CITY*, int);
+int fileRead(EDGE *edges);
+int cityID(EDGE *edges, CITY *cities, int n);
 GRAPH* createGraph(EDGE*, int);
 void printGraph(GRAPH*, int);
-//int ucusListele(EDGE *edges, int, int, int, int ,int[20][20], int, int); //uncomment
+//int listFlights(EDGE *edges, int, int, int, int ,int[20][20], int, int); //uncomment
 
-int ucusListele(EDGE *edges, int n, int k, int s_id, int d_id, int rapor[20][20], int x, int y){
+int listFlights(EDGE *edges, int n, int k, int s_id, int d_id, int report[20][20], int x, int y){
 
     int i = 0;
     int j = 0;
     while(i < n && k > 0){
         if(edges[i].src_id == s_id){
-            rapor[x][y] = edges[i].id;
-            printf("%d-> ", rapor[x][y]);
+            report[x][y] = edges[i].id;
+            printf("%d-> ", report[x][y]);
             if(edges[i].dest_id == d_id){
                 x = 0;
                 return y++;
             }else{
-                y = ucusListele(edges, n, k-1, edges[i].dest_id, d_id, rapor[20][20], x+1, y);
+                y = listFlights(edges, n, k - 1, edges[i].dest_id, d_id, report[20][20], x + 1, y);
             }
         }
         i++;
@@ -54,8 +58,8 @@ int ucusListele(EDGE *edges, int n, int k, int s_id, int d_id, int rapor[20][20]
     if(k == 0){
         while(i < n){
             if(edges[i].src_id == s_id && edges[i].dest_id == d_id ){
-                rapor[x][y] = edges[i].id;
-                printf("%d-> ", rapor[x][y]);
+                report[x][y] = edges[i].id;
+                printf("%d-> ", report[x][y]);
                 return y++;
             }else{
                 i++;
@@ -73,22 +77,22 @@ int main(void){
 
     EDGE edges[50];
 
-    n = dosyadanOku(edges);
+    n = fileRead(edges);
     CITY cities[2*n];
 
-    city_number = sehirID(edges, cities, n);
+    city_number = cityID(edges, cities, n);
     GRAPH *graph = createGraph(edges, n);
 
-    printf("\nSehirler ve ID'leri (Isim-ID)\n----------------------------\n");
+    printf("\nCities and IDs (City-ID)\n----------------------------\n");
     for(i = 0; i < city_number; i++){
         printf("%s-%d \n",
                cities[i].name, cities[i].id);
     }
 
-    printf("\nUcuslar ve Bilgileri\n-------------------------\n");
+    printf("\nFlights and Informations\n-------------------------\n");
     for (i = 0; i < n; i++) {
-        printf("%d No'lu Ucus --->"
-               "(%s, %s, %d saat,  %d dakika, %d tl, %d nolu sehirden, %d nolu sehire)  \n", i + 1,
+        printf("%d No Flight --->"
+               "(%s, %s, %d hours,  %d minutes, %d USD, from ID: %d ,to ID: %d)  \n", i + 1,
                edges[i].source, edges[i].destination, edges[i].hour,
                edges[i].minute,edges[i].price,
                edges[i].src_id,edges[i].dest_id);
@@ -100,12 +104,12 @@ int main(void){
      int s_id=0;
      int d_id=2;
      int x=0, y=0;
-     int rapor[n][n];
-     ucusListele(edges, n, k, s_id, d_id, rapor, x, y);
+     int report[n][n];
+    listFlights(edges, n, k, s_id, d_id, report, x, y);
      for(i = 0; i < n; i++){
          for(j = 0; j < n; j++){
-             if(rapor[j][i] != NULL){
-                 printf("%s ",edges[rapor[j][i]].destination);
+             if(report[j][i] != NULL){
+                 printf("%s ",edges[report[j][i]].destination);
              }
          }
 
@@ -115,7 +119,7 @@ int main(void){
 }
 
 
-int dosyadanOku(EDGE *edges){
+int fileRead(EDGE *edges){
 
     int i = 0;
     char filename[20] = "Sample.txt";
@@ -128,7 +132,7 @@ int dosyadanOku(EDGE *edges){
         }
         return i;
     }else{
-        printf("\nDosya acilamadi!");
+        printf("\nFile can't be opened!");
         fclose(fp);
         free(fp);
         return -1;
@@ -136,7 +140,7 @@ int dosyadanOku(EDGE *edges){
 }
 
 
-int sehirID(EDGE *edges, CITY *cities , int n){
+int cityID(EDGE *edges, CITY *cities , int n){
 
     int i = 0;
     int j = 0;
@@ -226,7 +230,7 @@ void printGraph(GRAPH* graph, int n){
     for (i = 0; i < n; i++){
         NODE* ptr = graph->head[i];
         while (ptr != NULL){
-            printf("\n(%d nolu sehirden-> %s)", i, ptr->destination);
+            printf("\n(from ID: %d ->to  %s)", i, ptr->destination);
             ptr = ptr->next;
         }
         printf("\n");
